@@ -207,7 +207,6 @@ static int isAtLeastGL3()
 #endif
 
 #ifdef SOIL_PLATFORM_WIN32
-static HMODULE openglModule = NULL;
 static int soilTestWinProcPointer(const PROC pTest)
 {
 	ptrdiff_t iTest;
@@ -231,15 +230,10 @@ void * SOIL_GL_GetProcAddress(const char *proc)
 		func = NULL;
 	#endif
 #elif defined( SOIL_PLATFORM_WIN32 )
-	if ( NULL == openglModule )
-		openglModule = LoadLibraryA("opengl32.dll");
-
 	func =  wglGetProcAddress( proc );
 
-	if (!soilTestWinProcPointer((const PROC)func)) {
-		func = (void *)GetProcAddress(openglModule, proc);
-	}
-
+	if (!soilTestWinProcPointer((const PROC)func))
+		func = NULL;
 #elif defined( SOIL_PLATFORM_OSX )
 	/*	I can't test this Apple stuff!	*/
 	CFBundleRef bundle;
@@ -1800,7 +1794,6 @@ int
 	unsigned char *pixel_data;
 	int i, j;
 	int save_result;
-	GLint pack_aligment;
 
 	/*	error checks	*/
 	if( (width < 1) || (height < 1) )
@@ -1819,20 +1812,9 @@ int
 		return 0;
 	}
 
-	glGetIntegerv(GL_PACK_ALIGNMENT, &pack_aligment);
-	if ( 1 != pack_aligment )
-	{
-		glPixelStorei(GL_PACK_ALIGNMENT,1);
-	}
-
 	/*  Get the data from OpenGL	*/
 	pixel_data = (unsigned char*)malloc( 3*width*height );
 	glReadPixels (x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixel_data);
-
-	if ( 1 != pack_aligment )
-	{
-		glPixelStorei(GL_PACK_ALIGNMENT, pack_aligment);
-	}
 
 	/*	invert the image	*/
 	for( j = 0; j*2 < height; ++j )
@@ -2134,13 +2116,23 @@ unsigned int SOIL_direct_load_DDS_from_memory(
 	}
 	if( (header.sCaps.dwCaps1 & DDSCAPS_MIPMAP) && (header.dwMipMapCount > 1) )
 	{
+		int shift_offset;
 		mipmaps = header.dwMipMapCount - 1;
 		DDS_full_size = DDS_main_size;
+		if( uncompressed )
+		{
+			/*	uncompressed DDS, simple MIPmap size calculation	*/
+			shift_offset = 0;
+		} else
+		{
+			/*	compressed DDS, MIPmap size calculation is block based	*/
+			shift_offset = 2;
+		}
 		for( i = 1; i <= mipmaps; ++ i )
 		{
 			int w, h;
-			w = width >> i;
-			h = height >> i;
+			w = width >> (shift_offset + i);
+			h = height >> (shift_offset + i);
 			if( w < 1 )
 			{
 				w = 1;
@@ -2149,15 +2141,7 @@ unsigned int SOIL_direct_load_DDS_from_memory(
 			{
 				h = 1;
 			}
-			if ( uncompressed )
-			{
-				/*	uncompressed DDS, simple MIPmap size calculation	*/
-				DDS_full_size += w*h*block_size;
-			} else
-			{
-				/*	compressed DDS, MIPmap size calculation is block based	*/
-				DDS_full_size += ((w+3)/4)*((h+3)/4)*block_size;
-			}
+			DDS_full_size += w*h*block_size;
 		}
 	} else
 	{
@@ -2805,10 +2789,6 @@ int query_NPOT_capability( void )
 			/*	it's there!	*/
 			has_NPOT_capability = SOIL_CAPABILITY_PRESENT;
 		}
-
-		#if defined( __emscripten__ ) || defined( EMSCRIPTEN )
-		has_NPOT_capability = SOIL_CAPABILITY_PRESENT;
-		#endif
 	}
 	/*	let the user know if we can do non-power-of-two textures or not	*/
 	return has_NPOT_capability;
@@ -3050,15 +3030,6 @@ int query_gen_mipmap_capability( void )
 			if(ext_addr == NULL)
 			{
 				ext_addr = (P_SOIL_GLGENERATEMIPMAPPROC)SOIL_GL_GetProcAddress("glGenerateMipmapEXT");
-			}
-
-			#elif !defined( SOIL_NO_EGL )
-
-			ext_addr = (P_SOIL_GLGENERATEMIPMAPPROC)SOIL_GL_GetProcAddress("glGenerateMipmapOES");
-
-			if(ext_addr == NULL)
-			{
-				ext_addr = (P_SOIL_GLGENERATEMIPMAPPROC)SOIL_GL_GetProcAddress("glGenerateMipmap");
 			}
 
 			#elif defined( SOIL_GLES2 )
