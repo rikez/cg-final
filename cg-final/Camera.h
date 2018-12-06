@@ -15,7 +15,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 enum CameraMovement {
-    FOWARD,
+    FORWARD,
     BACKWARD,
     LEFT,
     RIGHT
@@ -66,7 +66,7 @@ public:
     {
         GLfloat velocity = this->movementSpeed * deltaTime;
         
-        if (direction == FOWARD)
+        if (direction == FORWARD)
         {
             this->position += this->front * velocity;
         }
@@ -131,8 +131,14 @@ public:
         this->updateCameraVectors();
     }
     
-    GLfloat GetZoom() {
+    GLfloat GetZoom()
+    {
         return this->zoom;
+    }
+    
+    glm::vec3 GetPosition()
+    {
+        return this->position;
     }
     
 private:

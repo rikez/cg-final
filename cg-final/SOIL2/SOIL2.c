@@ -2855,7 +2855,7 @@ static P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC get_glCompressedTexImage2D_addr()
 	P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC ext_addr = NULL;
 	
 #if defined( SOIL_PLATFORM_WIN32 ) || defined( SOIL_PLATFORM_OSX ) || defined( SOIL_X11_PLATFORM )
-	ext_addr = (P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC)SOIL_GL_GetProcAddress( "glCompressedTexImage2D" );
+	ext_addr = (P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC)SOIL_GL_GetProcAddress("glCompressedTexImage2D");
 #else
 	ext_addr = (P_SOIL_GLCOMPRESSEDTEXIMAGE2DPROC)&glCompressedTexImage2D;
 #endif
