@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <cmath>
 
@@ -11,6 +10,7 @@
 
 // Other Libs
 #include "SOIL2/SOIL2.h"
+
 // GLM Mathematics
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,6 +19,7 @@
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
+#include "Cube.h"
 
 
 // Function prototypes
@@ -44,15 +45,8 @@ glm::vec3 lightPos( 1.2f, 1.0f, 2.0f );
 GLfloat deltaTime = 0.0f;    // Time between current frame and last frame
 GLfloat lastFrame = 0.0f;      // Time of last frame
 
-struct Points {
-    GLfloat x;
-    GLfloat y;
-    GLfloat z;
-};
-
-
 // The MAIN function, from here we start the application and run the game loop
-int main( )
+int main()
 {
     // Init GLFW
     glfwInit( );
@@ -114,35 +108,35 @@ int main( )
         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        
+
         -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
         -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
         -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        
+
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
         -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
         -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
         -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
         -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        
+
         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        
+
         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        
+
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
@@ -150,29 +144,7 @@ int main( )
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
-    
-    Points p;
-    p.x = 0.0f;
-    p.y = 0.0f;
-    p.z = 0.0f;
-    glm::vec3 cubePositions[1000] = {};
-    
-    for (GLuint i = 0; i < 1000; i++)
-    {
-        cubePositions[i] = glm::vec3( p.x, p.y, p.z );
-        
-        if (i % 2 == 0) {
-            p.x -= 1.0f;
-            p.y -= 2.0f;
-            p.z -= 3.0f;
-        } else {
-            p.x += 2.3f;
-            p.y += 1.0f;
-            p.z += 2.5f;
-        }
-        
-    }
-    
+
     // First, set the container's VAO (and VBO)
     GLuint VBO, containerVAO;
     glGenVertexArrays( 1, &containerVAO );
@@ -184,8 +156,7 @@ int main( )
     glBindVertexArray( containerVAO );
     // Position attribute
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( GLfloat ), ( GLvoid * )0 );
-    glEnableVertexAttribArray( 0 );
-    
+    glEnableVertexAttribArray(0);
     // Normal attribute
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( GLfloat ), ( GLvoid * )( 3 * sizeof( GLfloat ) ) );
     glEnableVertexAttribArray( 1 );
@@ -207,10 +178,6 @@ int main( )
     // Game loop
     while ( !glfwWindowShouldClose( window ) )
     {
-        // add after the code is displayed and working
-//        lightPos.x -= 0.01f;
-//        lightPos.z -= 0.01f;
-        
         // Calculate deltatime of current frame
         GLfloat currentFrame = glfwGetTime( );
         deltaTime = currentFrame - lastFrame;
@@ -224,16 +191,31 @@ int main( )
         glClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         
+        
         // Use cooresponding shader when setting uniforms/drawing objects
         lightingShader.Use( );
-        GLint objectColorLoc = glGetUniformLocation( lightingShader.Program, "objectColor" );
-        GLint lightColorLoc = glGetUniformLocation( lightingShader.Program, "lightColor" );
-        GLint lightPosLoc = glGetUniformLocation( lightingShader.Program, "lightPos" );
+        GLint lightPosLoc = glGetUniformLocation( lightingShader.Program, "light.position" );
         GLint viewPosLoc = glGetUniformLocation( lightingShader.Program, "viewPos" );
-        glUniform3f( objectColorLoc, 1.0f, 0.5f, 0.31f );
-        glUniform3f( lightColorLoc, 1.0f, 1.0f, 1.0f );
         glUniform3f( lightPosLoc, lightPos.x, lightPos.y, lightPos.z );
         glUniform3f( viewPosLoc, camera.GetPosition( ).x, camera.GetPosition( ).y, camera.GetPosition( ).z );
+        
+        // Set lights properties
+        glm::vec3 lightColor;
+        lightColor.r = sin( glfwGetTime( ) * 2.0f );
+        lightColor.g = sin( glfwGetTime( ) * 0.7f );
+        lightColor.b = sin( glfwGetTime( ) * 1.3f );
+        
+        glm::vec3 diffuseColor = lightColor * glm::vec3( 0.5f ); // Decrease the influence
+        glm::vec3 ambientColor = diffuseColor * glm::vec3( 0.2f ); // Low influence
+        glUniform3f( glGetUniformLocation( lightingShader.Program, "light.ambient" ), ambientColor.r, ambientColor.g, ambientColor.b );
+        glUniform3f( glGetUniformLocation( lightingShader.Program, "light.diffuse" ), diffuseColor.r, diffuseColor.g, diffuseColor.b);
+        glUniform3f( glGetUniformLocation( lightingShader.Program, "light.specular" ), 1.0f, 1.0f, 1.0f );
+        
+        // Set material properties
+        glUniform3f( glGetUniformLocation( lightingShader.Program, "material.ambient" ), 1.0f, 0.5f, 0.31f );
+        glUniform3f( glGetUniformLocation( lightingShader.Program, "material.diffuse"), 1.0f, 0.5f, 0.31f );
+        glUniform3f(glGetUniformLocation( lightingShader.Program, "material.specular" ), 0.5f, 0.5f, 0.5f ); // Specular doesn't have full effect on this object's material
+        glUniform1f(glGetUniformLocation( lightingShader.Program, "material.shininess" ), 32.0f );
         
         // Create camera transformations
         glm::mat4 view;
@@ -250,23 +232,11 @@ int main( )
         
         // Draw the container (using container's vertex attributes)
         glBindVertexArray( containerVAO );
-//        glm::mat4 model;
-//        glUniformMatrix4fv( modelLoc, 1, GL_FALSE, glm::value_ptr( model ) );
-//        glDrawArrays( GL_TRIANGLES, 0, 36 );
-//        glBindVertexArray( 0 );
         glm::mat4 model;
-        for (GLuint i = 0; i < 1000; i++)
-        {
-            model = glm::translate(model, cubePositions[i]);
-            GLfloat angle = 20.0f * i;
-            model = glm::rotate(model, (GLfloat) glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
-            
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        
+        glUniformMatrix4fv( modelLoc, 1, GL_FALSE, glm::value_ptr( model ) );
+        glDrawArrays( GL_TRIANGLES, 0, 36 );
         glBindVertexArray( 0 );
+        
         // Also draw the lamp object, again binding the appropriate shader
         lampShader.Use( );
         // Get location objects for the matrices on the lamp shader (these could be different on a different shader)
@@ -278,8 +248,9 @@ int main( )
         glUniformMatrix4fv( projLoc, 1, GL_FALSE, glm::value_ptr( projection ) );
         model = glm::mat4( );
         model = glm::translate( model, lightPos );
-        model = glm::scale( model, glm::vec3( 1.2f ) ); // Make it a smaller cube
+        model = glm::scale( model, glm::vec3( 0.2f ) ); // Make it a smaller cube
         glUniformMatrix4fv( modelLoc, 1, GL_FALSE, glm::value_ptr( model ) );
+        
         // Draw the light object (using light's vertex attributes)
         glBindVertexArray( lightVAO );
         glDrawArrays( GL_TRIANGLES, 0, 36 );
@@ -292,9 +263,9 @@ int main( )
     glDeleteVertexArrays( 1, &containerVAO );
     glDeleteVertexArrays( 1, &lightVAO );
     glDeleteBuffers( 1, &VBO );
-    
     // Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate( );
+    
     return EXIT_SUCCESS;
 }
 
