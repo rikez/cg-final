@@ -23,7 +23,7 @@ enum Camera_Movement
 const GLfloat YAW        = -90.0f;
 const GLfloat PITCH      =  0.0f;
 const GLfloat SPEED      =  6.0f;
-const GLfloat SENSITIVTY =  0.1f;
+const GLfloat SENSITIVTY =  0.25f;
 const GLfloat ZOOM       =  45.0f;
 
 // An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
@@ -57,7 +57,7 @@ public:
     }
     
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void OnKeyPress( Camera_Movement direction, GLfloat deltaTime )
+    void ProcessKeyboard( Camera_Movement direction, GLfloat deltaTime )
     {
         GLfloat velocity = this->movementSpeed * deltaTime;
         
@@ -83,7 +83,7 @@ public:
     }
     
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void OnMouseMove( GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true )
+    void ProcessMouseMovement( GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true )
     {
         xOffset *= this->mouseSensitivity;
         yOffset *= this->mouseSensitivity;
@@ -110,7 +110,7 @@ public:
     }
     
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-    void OnMouseScroll( GLfloat yOffset )
+    void ProcessMouseScroll( GLfloat yOffset )
     {
         
     }
@@ -123,6 +123,11 @@ public:
     glm::vec3 GetPosition( )
     {
         return this->position;
+    }
+    
+    glm::vec3 GetFront( )
+    {
+        return this->front;
     }
     
 private:
