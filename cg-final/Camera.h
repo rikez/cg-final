@@ -1,158 +1,181 @@
 #pragma once
 
-// Std. Includes
 #include <vector>
 
-// GL Includes
 #define GLEW_STATIC
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum Camera_Movement
+/**
+ * Definindo as possíveis direções do movimento da camera
+ */
+enum MovimentosCamera
 {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT
+    FRENTE,
+    TRAS,
+    ESQUERDA,
+    DIREITA
 };
 
-// Default camera values
-const GLfloat YAW        = -90.0f;
-const GLfloat PITCH      =  0.0f;
-const GLfloat SPEED      =  6.0f;
-const GLfloat SENSITIVTY =  0.1f;
-const GLfloat ZOOM       =  45.0f;
+/**
+ * Valores padrão da câmera
+ */
+const GLfloat MOVIMENTOZ      = -90.0f;
+const GLfloat MOVIMENTOX      =  0.0f;
+const GLfloat VELOCIDADE      =  6.0f;
+const GLfloat SENSIBILIDADE   =  0.25f;
+const GLfloat ZOOM            =  45.0f;
 
-// An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
+
+/**
+ * Abstração de uma camera que processa a entrada do teclado e mouse e calcular
+ * os ângulos, vetores e matrizes.
+ */
 class Camera
 {
 public:
-    // Constructor with vectors
-    Camera( glm::vec3 position = glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3 up = glm::vec3( 0.0f, 1.0f, 0.0f ), GLfloat yaw = YAW, GLfloat pitch = PITCH ) : front( glm::vec3( 0.0f, 0.0f, -1.0f ) ), movementSpeed( SPEED ), mouseSensitivity( SENSITIVTY ), zoom( ZOOM )
+    Camera( glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+            GLfloat movZ = MOVIMENTOZ,
+            GLfloat movX = MOVIMENTOX ) :
+                frontal( glm::vec3(0.0f, 0.0f, -1.0f)),
+                velocidadeMovimento(VELOCIDADE),
+                sensibilidadeMouse(SENSIBILIDADE),
+                zoom(ZOOM)
     {
-        this->position = position;
-        this->worldUp = up;
-        this->yaw = yaw;
-        this->pitch = pitch;
-        this->updateCameraVectors( );
+        this->posicao = posicao;
+        this->acima = cima;
+        this->movZ = movZ;
+        this->movX = movX;
+        this->atualizaVetoresDaCamera( );
     }
     
-    // Constructor with scalar values
-    Camera( GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch ) : front( glm::vec3( 0.0f, 0.0f, -1.0f ) ), movementSpeed( SPEED ), mouseSensitivity( SENSITIVTY ), zoom( ZOOM )
+    Camera( GLfloat posX,
+            GLfloat posY,
+            GLfloat posZ,
+            GLfloat cimaX,
+            GLfloat cimaY,
+            GLfloat cimaZ,
+            GLfloat movZ,
+            GLfloat movX ) :
+                frontal(glm::vec3( 0.0f, 0.0f, -1.0f)),
+                velocidadeMovimento(VELOCIDADE),
+                sensibilidadeMouse(SENSIBILIDADE),
+                zoom(ZOOM)
     {
-        this->position = glm::vec3( posX, posY, posZ );
-        this->worldUp = glm::vec3( upX, upY, upZ );
-        this->yaw = yaw;
-        this->pitch = pitch;
-        this->updateCameraVectors( );
+        this->posicao = glm::vec3(posX, posY, posZ);
+        this->acima = glm::vec3(cimaX, cimaY, cimaZ);
+        this->movZ = movZ;
+        this->movX = movX;
+        this->atualizaVetoresDaCamera( );
     }
     
-    // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
-    glm::mat4 GetViewMatrix( )
+    // Retorna matriz de visualizacao usando lookAt
+    glm::mat4 ObterMatrizVisualizacao()
     {
-        return glm::lookAt( this->position, this->position + this->front, this->up );
+        return glm::lookAt(this->posicao, this->posicao + this->frontal, this->cima);
     }
     
-    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void OnKeyPress( Camera_Movement direction, GLfloat deltaTime )
+    void ProcessaTeclado(MovimentosCamera direcao, GLfloat deltaT)
     {
-        GLfloat velocity = this->movementSpeed * deltaTime;
+        GLfloat velocidade = this->velocidadeMovimento * deltaT;
         
-        if ( direction == FORWARD )
+        if (direcao == FRENTE)
         {
-            this->position += this->front * velocity;
+            this->posicao += this->frontal * velocidade;
         }
         
-        if ( direction == BACKWARD )
+        if (direcao == TRAS)
         {
-            this->position -= this->front * velocity;
+            this->posicao -= this->frontal * velocidade;
         }
         
-        if ( direction == LEFT )
+        if (direcao == ESQUERDA)
         {
-            this->position -= this->right * velocity;
+            this->posicao -= this->direita * velocidade;
         }
         
-        if ( direction == RIGHT )
+        if (direcao == DIREITA)
         {
-            this->position += this->right * velocity;
+            this->posicao += this->direita * velocidade;
         }
     }
     
-    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void OnMouseMove( GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true )
+    void ProcessaMovimentoMouse(GLfloat deltaX, GLfloat deltaY, GLboolean limiteMovX = true)
     {
-        xOffset *= this->mouseSensitivity;
-        yOffset *= this->mouseSensitivity;
+        deltaX *= this->sensibilidadeMouse;
+        deltaY *= this->sensibilidadeMouse;
         
-        this->yaw   += xOffset;
-        this->pitch += yOffset;
+        this->movZ += deltaX;
+        this->movX += deltaY;
         
-        // Make sure that when pitch is out of bounds, screen doesn't get flipped
-        if ( constrainPitch )
+        if (limiteMovX)
         {
-            if ( this->pitch > 89.0f )
+            if ( this->movX > 89.0f )
             {
-                this->pitch = 89.0f;
+                this->movX = 89.0f;
             }
             
-            if ( this->pitch < -89.0f )
+            if ( this->movX < -89.0f )
             {
-                this->pitch = -89.0f;
+                this->movX = -89.0f;
             }
         }
         
-        // Update Front, Right and Up Vectors using the updated Eular angles
-        this->updateCameraVectors( );
+        this->atualizaVetoresDaCamera( );
     }
     
-    // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-    void OnMouseScroll( GLfloat yOffset )
+    void ProcessMouseScroll( GLfloat yOffset )
     {
         
     }
     
-    GLfloat GetZoom( )
+    GLfloat ObterZoom( )
     {
         return this->zoom;
     }
     
-    glm::vec3 GetPosition( )
+    glm::vec3 ObterPosicao( )
     {
-        return this->position;
+        return this->posicao;
+    }
+    
+    glm::vec3 ObterFrente( )
+    {
+        return this->frontal;
     }
     
 private:
-    // Camera Attributes
-    glm::vec3 position;
-    glm::vec3 front;
-    glm::vec3 up;
-    glm::vec3 right;
-    glm::vec3 worldUp;
+    // Atributos da camera
+    glm::vec3 posicao;
+    glm::vec3 frontal;
+    glm::vec3 cima;
+    glm::vec3 direita;
+    glm::vec3 acima;
     
-    // Eular Angles
-    GLfloat yaw;
-    GLfloat pitch;
+    // Angulos
+    GLfloat movZ;
+    GLfloat movX;
     
-    // Camera options
-    GLfloat movementSpeed;
-    GLfloat mouseSensitivity;
+    // Opcoes
+    GLfloat velocidadeMovimento;
+    GLfloat sensibilidadeMouse;
     GLfloat zoom;
     
-    // Calculates the front vector from the Camera's (updated) Eular Angles
-    void updateCameraVectors( )
+    // Calcula os vetores frontais da camera
+    void atualizaVetoresDaCamera( )
     {
-        // Calculate the new Front vector
-        glm::vec3 front;
-        front.x = cos( glm::radians( this->yaw ) ) * cos( glm::radians( this->pitch ) );
-        front.y = sin( glm::radians( this->pitch ) );
-        front.z = sin( glm::radians( this->yaw ) ) * cos( glm::radians( this->pitch ) );
-        this->front = glm::normalize( front );
-        // Also re-calculate the Right and Up vector
-        this->right = glm::normalize( glm::cross( this->front, this->worldUp ) );  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-        this->up = glm::normalize( glm::cross( this->right, this->front ) );
+        // Calcula vetor frontal
+        glm::vec3 frontal;
+        frontal.x = cos(glm::radians( this->movZ ) ) * cos( glm::radians( this->movX ) );
+        frontal.y = sin(glm::radians( this->movX ) );
+        frontal.z = sin(glm::radians( this->movZ ) ) * cos( glm::radians( this->movX ) );
+        this->frontal = glm::normalize(frontal);
+        
+        // Recalcula os vetores da direita e de cima.
+        this->direita = glm::normalize(glm::cross(this->frontal, this->acima));
+        this->cima = glm::normalize(glm::cross(this->direita, this->frontal));
     }
 };
