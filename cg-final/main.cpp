@@ -27,7 +27,7 @@ void MouseCallback( GLFWwindow *window, double xPos, double yPos );
 void DoMovement( );
 
 // Window dimensions
-const GLuint WIDTH = 800, HEIGHT = 600;
+const GLuint WIDTH = 1280, HEIGHT = 1024;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
@@ -44,8 +44,7 @@ glm::vec3 lightPos( 1.2f, 1.0f, 2.0f );
 GLfloat deltaTime = 0.0f;    // Time between current frame and last frame
 GLfloat lastFrame = 0.0f;      // Time of last frame
 
-// The MAIN function, from here we start the application and run the game loop
-int main( )
+int main()
 {
     // Init GLFW
     glfwInit( );
@@ -258,12 +257,7 @@ int main( )
         glUniform3f( viewPosLoc, camera.GetPosition( ).x, camera.GetPosition( ).y, camera.GetPosition( ).z);
         // Set material properties
         glUniform1f( glGetUniformLocation( lightingShader.Program, "material.shininess" ), 32.0f );
-        // == ==========================
-        // Here we set all the uniforms for the 5/6 types of lights we have. We have to set them manually and index
-        // the proper PointLight struct in the array to set each uniform variable. This can be done more code-friendly
-        // by defining light types as classes and set their values in there, or by using a more efficient uniform approach
-        // by using 'Uniform buffer objects', but that is something we discuss in the 'Advanced GLSL' tutorial.
-        // == ==========================
+
         // Directional light
         glUniform3f( glGetUniformLocation( lightingShader.Program, "dirLight.direction" ), -0.2f, -1.0f, -0.3f );
         glUniform3f( glGetUniformLocation( lightingShader.Program, "dirLight.ambient" ), 0.05f, 0.05f, 0.05f );
@@ -344,8 +338,11 @@ int main( )
         {
             model = glm::mat4( );
             model = glm::translate( model, cubePositions[i] );
-            GLfloat angle = 20.0f * i;
-            model = glm::rotate( model, angle, glm::vec3( 1.0f, 0.3f, 0.5f ) );
+            if (i % 2 == 0) {
+                model = glm::rotate( model, (GLfloat) glfwGetTime(), glm::vec3( 1.0f, 0.3f, 0.5f ) );
+            } else {
+                model = glm::rotate( model, (GLfloat) glfwGetTime() * -1.0f, glm::vec3( 1.0f, 0.3f, 0.5f ) );
+            }
             glUniformMatrix4fv( modelLoc, 1, GL_FALSE, glm::value_ptr( model ) );
             
             glDrawArrays( GL_TRIANGLES, 0, 36 );
