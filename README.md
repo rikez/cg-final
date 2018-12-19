@@ -1,12 +1,12 @@
 # Computer Graphics Final
 
-The Computer Graphics class presented plenty of challenges over the semester, requiring knowledge about *Transformtions*, *Cameras*, *Lighting*, *Modelling*, *Animating*, etc...
+The Computer Graphics class presented plenty of challenges over the semester, requiring knowledge on *Transformations*, *Cameras*, *Lighting*, *Modelling*, *Animation*, etc...
 
 At the end, the students had to show their knowledge and coding performance by applying those concepts mentioned above in a project of free theme choice.
 
 ## Solution
 
-Spent a couple of nights trying to build something cool, I have built a lot of dynamic cubes with a wood box texture, all over the plan. To complement, a decided to explore the lighting effects on that boxes, using the *direcional* , *point of lights* and *spotlight* at the same scene.
+Spent a couple of nights trying to build something cool, I have built dynamic cubes with a wood box texture, all over the plan. To complement, a decided to explore the lighting effects on that boxes, using the *direcional* , *point of lights* and *spotlight* at the same scene.
 
 ### Point of lights
  - Created light bulbs in the scene, so that the shadowing is clearly visible.
